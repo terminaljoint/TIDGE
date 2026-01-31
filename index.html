@@ -4,27 +4,55 @@
   <meta charset="UTF-8">
   <title>TIGEN v1 | Terminal Game Engine</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="app">
-  <header>
-    <b>TIGEN <span>v1</span></b>
-  </header>
-  <main id="viewport"></main>
+<div class="play-overlay" id="play-ui">
+  <div class="dot"></div>
+  <b>SANDBOX ACTIVE</b>
+  <span>| WASD Move | Shift Sprint | Space Jump | Esc Exit</span>
 </div>
 
-<!-- THREE.js -->
+<div class="layout">
+  <header>
+    <div class="logo">TIGEN <span>v1</span></div>
+    <button class="play-btn" id="play-btn">ENTER GAMEWORLD</button>
+    <div>
+      <span class="autosave">AUTO-SAVE: ON</span>
+      <button id="clear-btn">Clear World</button>
+    </div>
+  </header>
+
+  <aside class="panel">
+    <div class="panel-h">Outliner <button id="add-box">+</button></div>
+    <div id="hierarchy"></div>
+  </aside>
+
+  <main id="vp" tabindex="0"></main>
+
+  <aside class="inspector panel">
+    <div class="panel-h">Entity Inspector</div>
+    <div id="ins-root"></div>
+    <div id="ins-none">Select an object in the world to edit</div>
+  </aside>
+</div>
+
+<!-- THREE -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.145/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.145/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.145/examples/js/controls/TransformControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.145/examples/js/loaders/GLTFLoader.js"></script>
 
 <!-- TIGEN CORE -->
 <script src="renderer.js"></script>
-<script src="entity.js"></script>
-<script src="scene.js"></script>
 <script src="input.js"></script>
+<script src="inspector.js"></script>
+<script src="editor.js"></script>
 <script src="loop.js"></script>
 <script src="main.js"></script>
+
 </body>
 </html>
+
