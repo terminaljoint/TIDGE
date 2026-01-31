@@ -1,13 +1,16 @@
-const Loop = {
-  clock: new THREE.Clock(),
+class TIGEN_Loop{
+  constructor(editor){
+    this.editor = editor;
+    this.clock = new THREE.Clock();
+  }
+
   start(){
     const tick = () => {
       requestAnimationFrame(tick);
       const dt = this.clock.getDelta();
-      ENGINE.update(dt);
-      ENGINE.render();
+      this.editor.update(dt);
+      this.editor.render();
     };
     tick();
   }
-};
-
+}
