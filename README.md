@@ -1,4 +1,4 @@
-# TAGER ( Terminal joint Advanced Game Engine Resource )
+# TIGEN ( Terminal joint Intelligence Game Engine Network )
 
 Proprietary Game engine of Terminal Joint
 
