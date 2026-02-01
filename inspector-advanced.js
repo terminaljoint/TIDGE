@@ -17,14 +17,16 @@ class TIGENInspector {
   }
 
   refresh() {
-    this.container.innerHTML = '';
+    if (this.container) this.container.innerHTML = '';
 
     if (!this.selected) {
-      this.noSelectionContainer.style.display = 'block';
+      if (this.noSelectionContainer) this.noSelectionContainer.style.display = 'block';
       return;
     }
 
-    this.noSelectionContainer.style.display = 'none';
+    if (this.noSelectionContainer) this.noSelectionContainer.style.display = 'none';
+
+    if (!this.container) return;
 
     // Entity Name
     const nameSection = this.createSection('Entity Properties');
@@ -236,6 +238,7 @@ class TIGENOutliner {
 
   refresh() {
     if (!this.scene) return;
+    if (!this.container) return;
 
     this.container.innerHTML = '';
 
