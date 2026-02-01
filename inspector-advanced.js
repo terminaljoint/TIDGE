@@ -274,5 +274,10 @@ class TIGENOutliner {
   }
 }
 
-const TIGEN_Inspector = new TIGENInspector();
-const TIGEN_Outliner = new TIGENOutliner();
+if (typeof window.TIGEN_Inspector === 'undefined') {
+  window.TIGEN_Inspector = new TIGENInspector();
+}
+
+if (typeof window.TIGEN_Outliner === 'undefined') {
+  window.TIGEN_Outliner = new TIGENOutliner();
+}
