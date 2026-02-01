@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIGEN v3 - Professional 3D Editor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    
+    body {
+      font-family: 'Fira Code', monospace;
+      background: #0a0b0d;
+      color: #ececed;
+      overflow: hidden;
+    }
+
+    .editor {
+      display: grid;
+      grid-template-columns: 280px 1fr 320px;
+      grid-template-rows: 60px 1fr 40px 200px;
+      height: 100vh;
+      gap: 1px;
+      background: #1a1d22;
+    }
+
+    /* HEADER */
+    .header {
+      grid-column: 1 / -1;
+      background: rgba(15, 16, 19, 0.98);
+      border-bottom: 2px solid #00ff88;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .title { font-size: 18px; font-weight: bold; color: #00ff88; }
+    
+    .status {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      font-size: 12px;
+    }
+
+    .status-item {
+      padding: 6px 12px;
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.3);
+      border-radius: 3px;
+    }
+
+    button {
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid #00ff88;
+      color: #00ff88;
+      padding: 8px 16px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: rgba(0, 255, 136, 0.2);
+      transform: scale(1.05);
+    }
+
+    button.active {
+      background: #00ff88;
+      color: #0a0b0d;
+    }
+
+    /* LEFT PANEL - ASSETS */
+    .assets-panel {
+      grid-row: 2;
+      grid-column: 1;
+      background: rgba(15, 16, 19, 0.9);
+      border-right: 1px solid rgba(0, 255, 136, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-title {
+      padding: 12px;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+      font-weight: bold;
+      color: #00ff88;
+      font-size: 12px;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+    }
+
+    .asset-item {
+      padding: 10px;
+      margin-bottom: 6px;
+      background: rgba(0, 255, 136, 0.05);
+      border: 1px solid rgba(0, 255, 136, 0.15);
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    .asset-item:hover {
+      background: rgba(0, 255, 136, 0.15);
+      border-color: #00ff88;
+    }
+
+    .asset-category {
+      font-weight: bold;
+      color: #00ff88;
+      padding: 8px 10px;
+      margin-top: 10px;
+      margin-bottom: 8px;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+
+    /* CENTER - VIEWPORT & TIMELINE */
+    .viewport-area {
+      grid-row: 2;
+      grid-column: 2;
+      display: flex;
+      flex-direction: column;
+      background: rgba(15, 16, 19, 0.9);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .viewport-toolbar {
+      padding: 10px;
+      background: rgba(20, 23, 28, 0.9);
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      height: 45px;
+    }
+
+    #viewport {
+      flex: 1;
+      cursor: crosshair;
+      background: linear-gradient(135deg, #0a0b0d 0%, #1a1d22 100%);
+    }
+
+    /* RIGHT PANEL - INSPECTOR */
+    .inspector-panel {
+      grid-row: 2;
+      grid-column: 3;
+      background: rgba(15, 16, 19, 0.9);
+      border-left: 1px solid rgba(0, 255, 136, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .inspector-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #888;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      border-bottom-color: #00ff88;
+      color: #00ff88;
+    }
+
+    .inspector-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .property {
+      margin-bottom: 12px;
+    }
+
+    .property-label {
+      font-size: 10px;
+      color: #888;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .property-input {
+      display: flex;
+      gap: 6px;
+    }
+
+    .property-input input {
+      flex: 1;
+      background: rgba(0, 255, 136, 0.05);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      color: #00ff88;
+      padding: 6px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-family: monospace;
+    }
+
+    .property-input input:focus {
+      border-color: #00ff88;
+      outline: none;
+      box-shadow: 0 0 8px rgba(0, 255, 136, 0.3);
+    }
+
+    /* BOTTOM - CONSOLE & TIMELINE */
+    .bottom-panel {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 1px;
+      background: #1a1d22;
+    }
+
+    .console-panel {
+      grid-row: 4;
+      grid-column: 1 / -1;
+      background: rgba(15, 16, 19, 0.9);
+      border-top: 1px solid rgba(0, 255, 136, 0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .console-header {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+      font-weight: bold;
+      color: #00ff88;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .console-output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      font-family: 'Monaco', monospace;
+      font-size: 11px;
+    }
+
+    .console-msg {
+      margin-bottom: 4px;
+      padding: 4px 8px;
+      background: rgba(0, 255, 136, 0.05);
+      border-left: 2px solid #00ff88;
+      border-radius: 2px;
+    }
+
+    .timeline-section {
+      grid-row: 3 / 5;
+      grid-column: 1 / -1;
+      background: rgba(15, 16, 19, 0.9);
+      border-top: 1px solid rgba(0, 255, 136, 0.2);
+      padding: 8px 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .timeline-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    #timeline {
+      flex: 1;
+      background: rgba(0, 255, 136, 0.05);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 3px;
+      height: 30px;
+      cursor: pointer;
+    }
+
+    .scrollbar {
+      width: 8px;
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    .scrollbar-thumb {
+      background: rgba(0, 255, 136, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 136, 0.2);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 255, 136, 0.4);
+    }
+
+    input[type="range"] {
+      accent-color: #00ff88;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="editor">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="title">🎮 TIGEN v3 - Professional 3D Editor</div>
+      <div class="status">
+        <div class="status-item">Entities: <span id="entityCount">0</span></div>
+        <div class="status-item">FPS: <span id="fpsCount">0</span></div>
+        <button onclick="editorState.save()">💾 Save</button>
+        <button onclick="editorState.load()">📂 Load</button>
+      </div>
+    </div>
+
+    <!-- LEFT: ASSETS PANEL -->
+    <div class="assets-panel">
+      <div class="panel-title">📦 ASSETS</div>
+      <div class="panel-content">
+        <div class="button-group" style="padding: 0 8px 12px;">
+          <button onclick="editorState.createCube()" style="flex: 1;">+ Cube</button>
+          <button onclick="editorState.createSphere()" style="flex: 1;">+ Sphere</button>
+        </div>
+
+        <div class="asset-category">🎨 Materials</div>
+        <div id="materialsList"></div>
+
+        <div class="asset-category">📊 Meshes</div>
+        <div id="meshesList"></div>
+
+        <div class="asset-category">✨ Animations</div>
+        <div class="button-group" style="padding: 0 8px;">
+          <button onclick="editorState.createAnimation()" style="flex: 1;">+ Create</button>
+        </div>
+        <div id="animationsList"></div>
+      </div>
+    </div>
+
+    <!-- CENTER: VIEWPORT -->
+    <div class="viewport-area">
+      <div class="viewport-toolbar">
+        <button onclick="editorState.toggleGrid()">🔲 Grid</button>
+        <button onclick="editorState.resetView()">🎯 Reset View</button>
+        <button id="playBtn" onclick="editorState.togglePlay()">▶ Play</button>
+        <div style="flex: 1;"></div>
+        <div style="font-size: 11px; color: #888;">Click to select | Drag to move</div>
+      </div>
+      <canvas id="viewport"></canvas>
+    </div>
+
+    <!-- RIGHT: INSPECTOR -->
+    <div class="inspector-panel">
+      <div class="inspector-tabs">
+        <button class="tab-btn active" onclick="switchTab('transform')">Transform</button>
+        <button class="tab-btn" onclick="switchTab('mesh')">Mesh</button>
+        <button class="tab-btn" onclick="switchTab('animation')">Animation</button>
+      </div>
+      <div class="inspector-content" id="inspectorContent">
+        <div style="color: #888; font-size: 12px;">Select an object to edit</div>
+      </div>
+    </div>
+
+    <!-- BOTTOM: CONSOLE -->
+    <div class="console-panel">
+      <div class="console-header">
+        📋 CONSOLE
+        <button onclick="document.getElementById('consoleOutput').innerHTML=''" style="padding: 2px 8px; font-size: 10px;">Clear</button>
+      </div>
+      <div class="console-output" id="consoleOutput"></div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-section">
+      <div class="timeline-controls">
+        <button id="timelinePlay" onclick="editorState.toggleTimelinePlay()">⏯️</button>
+        <input type="range" id="timelineSlider" min="0" max="10" step="0.01" style="width: 200px;">
+        <span id="timelineTime" style="font-size: 11px; color: #00ff88; min-width: 40px;">0.0s</span>
+      </div>
+      <canvas id="timeline" style="flex: 1;"></canvas>
+    </div>
+  </div>
+
+  <script src="core-engine-v3.js"></script>
+  <script>
+    // ===== EDITOR STATE =====
+    const editorState = {
+      renderer: null,
+      scene: null,
+      gameLoop: null,
+      selectedEntity: null,
+      isPlaying: false,
+      isTimelinePlay: false,
+      timelineTime: 0,
+      assetManager: null,
+
+      init() {
+        const canvas = document.getElementById('viewport');
+        canvas.width = window.innerWidth * 0.65 - 20;
+        canvas.height = window.innerHeight - 300;
+
+        this.renderer = new Renderer(canvas);
+        this.scene = this.renderer.createScene();
+        this.gameLoop = new GameLoop(60);
+        this.assetManager = new AssetManager();
+
+        // Create default cube
+        const cube = this.scene.createEntity('Cube');
+        const geom = new Geometry('box', { size: 1 });
+        const mat = new Material('Default');
+        mat.color = { r: 0, g: 1, b: 0.8 };
+        cube.setMesh(geom, mat);
+
+        this.gameLoop.setCallback(dt => this.update(dt));
+        this.gameLoop.start();
+
+        this.updateUI();
+        this.log('Editor initialized ✓');
+      },
+
+      createCube() {
+        const cube = this.scene.createEntity(`Cube_${this.scene.getEntityCount()}`);
+        const geom = new Geometry('box', { size: 1 });
+        const mat = new Material('Default');
+        mat.color = { r: Math.random(), g: Math.random(), b: Math.random() };
+        cube.setMesh(geom, mat);
+        this.updateUI();
+        this.log(`Created ${cube.name}`);
+      },
+
+      createSphere() {
+        const sphere = this.scene.createEntity(`Sphere_${this.scene.getEntityCount()}`);
+        const geom = new Geometry('sphere', { radius: 1 });
+        const mat = new Material('Default');
+        mat.color = { r: Math.random(), g: Math.random(), b: Math.random() };
+        sphere.setMesh(geom, mat);
+        this.updateUI();
+        this.log(`Created ${sphere.name}`);
+      },
+
+      createAnimation() {
+        if (!this.selectedEntity) {
+          this.log('Select an entity first', 'error');
+          return;
+        }
+        const clip = new AnimationClip(`${this.selectedEntity.name}_Anim`);
+        clip.addKeyframe('posX', 0, this.selectedEntity.transform.position.x);
+        clip.addKeyframe('posX', 2, this.selectedEntity.transform.position.x + 3);
+        clip.addKeyframe('posX', 4, this.selectedEntity.transform.position.x);
+
+        this.selectedEntity.animationController.addClip(clip);
+        this.updateUI();
+        this.log(`Created animation for ${this.selectedEntity.name}`);
+      },
+
+      selectEntity(entity) {
+        if (this.selectedEntity) this.selectedEntity.selected = false;
+        this.selectedEntity = entity;
+        entity.selected = true;
+        this.updateInspector();
+        this.log(`Selected: ${entity.name}`);
+      },
+
+      deleteEntity() {
+        if (this.selectedEntity) {
+          const name = this.selectedEntity.name;
+          this.scene.deleteEntity(this.selectedEntity);
+          this.selectedEntity = null;
+          this.updateUI();
+          this.log(`Deleted: ${name}`);
+        }
+      },
+
+      update(dt) {
+        this.scene.update(dt);
+
+        if (this.isTimelinePlay && this.selectedEntity && this.selectedEntity.animationController.currentClip) {
+          this.timelineTime += dt;
+          document.getElementById('timelineSlider').value = this.timelineTime;
+          document.getElementById('timelineTime').textContent = this.timelineTime.toFixed(1) + 's';
+        }
+
+        this.renderer.render(dt);
+        this.updateStats(dt);
+      },
+
+      updateUI() {
+        document.getElementById('entityCount').textContent = this.scene.getEntityCount();
+        this.updateAssetsList();
+        this.updateHierarchy();
+      },
+
+      updateStats(dt) {
+        document.getElementById('fpsCount').textContent = this.gameLoop.fps;
+      },
+
+      updateAssetsList() {
+        const materials = this.assetManager.getAssetsByType('material');
+        const meshes = this.assetManager.getAssetsByType('mesh');
+
+        let html = '';
+        for (const mat of materials) {
+          html += `<div class="asset-item" onclick="alert('Material: ${mat.name}')">${mat.name}</div>`;
+        }
+        document.getElementById('materialsList').innerHTML = html;
+
+        html = '';
+        for (const mesh of meshes) {
+          html += `<div class="asset-item" onclick="alert('Mesh: ${mesh.name}')">${mesh.name}</div>`;
+        }
+        document.getElementById('meshesList').innerHTML = html;
+      },
+
+      updateHierarchy() {
+        const entities = this.scene.getRootEntities();
+        document.querySelectorAll('.asset-item').forEach(el => {
+          if (el.closest('#materialsList') || el.closest('#meshesList')) return;
+        });
+      },
+
+      updateInspector() {
+        if (!this.selectedEntity) {
+          document.getElementById('inspectorContent').innerHTML = '<div style="color: #888; font-size: 12px;">No object selected</div>';
+          return;
+        }
+
+        const e = this.selectedEntity;
+        const t = e.transform;
+
+        let html = `
+          <div class="property">
+            <div class="property-label">Name</div>
+            <div class="property-input">
+              <input type="text" value="${e.name}" onchange="editorState.selectedEntity.name = this.value;">
+            </div>
+          </div>
+
+          <div class="property">
+            <div class="property-label">Position X</div>
+            <div class="property-input">
+              <input type="number" value="${t.position.x.toFixed(2)}" step="0.1" onchange="editorState.selectedEntity.transform.position.x = parseFloat(this.value);">
+            </div>
+          </div>
+
+          <div class="property">
+            <div class="property-label">Position Y</div>
+            <div class="property-input">
+              <input type="number" value="${t.position.y.toFixed(2)}" step="0.1" onchange="editorState.selectedEntity.transform.position.y = parseFloat(this.value);">
+            </div>
+          </div>
+
+          <div class="property">
+            <div class="property-label">Position Z</div>
+            <div class="property-input">
+              <input type="number" value="${t.position.z.toFixed(2)}" step="0.1" onchange="editorState.selectedEntity.transform.position.z = parseFloat(this.value);">
+            </div>
+          </div>
+
+          <div class="property">
+            <div class="property-label">Scale</div>
+            <div class="property-input">
+              <input type="number" value="${t.scale.x.toFixed(2)}" step="0.1" onchange="editorState.selectedEntity.transform.scale.x = parseFloat(this.value); editorState.selectedEntity.transform.scale.y = parseFloat(this.value); editorState.selectedEntity.transform.scale.z = parseFloat(this.value);">
+            </div>
+          </div>
+
+          <div class="property">
+            <div class="property-label">Rotation Y</div>
+            <div class="property-input">
+              <input type="number" value="${t.rotation.y.toFixed(2)}" step="0.1" onchange="editorState.selectedEntity.transform.rotation.y = parseFloat(this.value);">
+            </div>
+          </div>
+
+          <button onclick="editorState.deleteEntity()" style="width: 100%; margin-top: 20px; background: rgba(255, 100, 100, 0.1); border-color: #ff6464; color: #ff6464;">🗑️ Delete</button>
+        `;
+
+        document.getElementById('inspectorContent').innerHTML = html;
+      },
+
+      togglePlay() {
+        this.isPlaying = !this.isPlaying;
+        document.getElementById('playBtn').textContent = this.isPlaying ? '⏸ Stop' : '▶ Play';
+        this.log(this.isPlaying ? 'Playing' : 'Stopped');
+      },
+
+      toggleTimelinePlay() {
+        this.isTimelinePlay = !this.isTimelinePlay;
+        if (this.selectedEntity && this.selectedEntity.animationController.clips) {
+          const clipName = Object.keys(this.selectedEntity.animationController.clips)[0];
+          if (clipName) {
+            this.selectedEntity.animationController.play(clipName);
+            document.getElementById('timelinePlay').textContent = this.isTimelinePlay ? '⏸️' : '⏯️';
+            this.log(`Playing animation: ${clipName}`);
+          }
+        }
+      },
+
+      toggleGrid() {
+        this.log('Grid toggled');
+      },
+
+      resetView() {
+        this.log('View reset');
+      },
+
+      save() {
+        const data = this.scene.serialize();
+        localStorage.setItem('tigen_scene', JSON.stringify(data));
+        this.log('Scene saved ✓');
+      },
+
+      load() {
+        const data = localStorage.getItem('tigen_scene');
+        if (data) {
+          this.log('Scene loaded ✓');
+        } else {
+          this.log('No saved scene', 'error');
+        }
+      },
+
+      log(msg, type = 'log') {
+        const console = document.getElementById('consoleOutput');
+        const msg_el = document.createElement('div');
+        msg_el.className = 'console-msg';
+        msg_el.textContent = msg;
+        console.appendChild(msg_el);
+        console.scrollTop = console.scrollHeight;
+      }
+    };
+
+    // ===== UI FUNCTIONS =====
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // ===== VIEWPORT INTERACTION =====
+    const canvas = document.getElementById('viewport');
+    let dragging = false;
+    let dragStart = { x: 0, y: 0 };
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      for (const entity of editorState.scene.getRootEntities()) {
+        const ex = editorState.renderer.width / 2 + entity.transform.position.x * 40;
+        const ey = editorState.renderer.height / 2 - entity.transform.position.z * 40;
+        const dist = Math.sqrt((x - ex) ** 2 + (y - ey) ** 2);
+        if (dist < 30) {
+          editorState.selectEntity(entity);
+          return;
+        }
+      }
+
+      editorState.selectedEntity = null;
+      editorState.updateInspector();
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      dragging = true;
+      dragStart = { x: e.clientX, y: e.clientY };
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (dragging && editorState.selectedEntity) {
+        const dx = (e.clientX - dragStart.x) / 40;
+        const dz = (dragStart.y - e.clientY) / 40;
+        editorState.selectedEntity.transform.position.x += dx;
+        editorState.selectedEntity.transform.position.z += dz;
+        dragStart = { x: e.clientX, y: e.clientY };
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => { dragging = false; });
+
+    // ===== INITIALIZE =====
+    window.addEventListener('load', () => {
+      editorState.init();
+    });
+
+    window.switchTab = switchTab;
+  </script>
+</body>
+</html>
