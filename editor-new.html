@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIGEN v2 - Editor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0b0d;
+      color: #ececed;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* ===== MAIN LAYOUT ===== */
+    .editor-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      background: rgba(15, 16, 19, 0.95);
+      border-bottom: 1px solid #2a2d32;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 50px;
+      gap: 20px;
+    }
+
+    .topbar-left {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .topbar-logo {
+      font-size: 18px;
+      font-weight: 900;
+      color: #00ff88;
+      text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    }
+
+    .topbar-title {
+      color: #999;
+      font-size: 13px;
+      border-left: 1px solid #3a3d42;
+      padding-left: 15px;
+    }
+
+    .topbar-center {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .topbar-btn {
+      background: rgba(42, 45, 50, 0.6);
+      border: 1px solid #3a3d42;
+      color: #ccc;
+      padding: 6px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .topbar-btn:hover {
+      background: rgba(42, 45, 50, 1);
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+
+    .topbar-btn.active {
+      background: #00ff88;
+      color: #000;
+      border-color: #00ff88;
+    }
+
+    .topbar-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* MAIN CONTENT */
+    .main-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR LEFT */
+    .sidebar-left {
+      width: 300px;
+      background: rgba(20, 22, 26, 0.8);
+      border-right: 1px solid #2a2d32;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #2a2d32;
+      height: 40px;
+    }
+
+    .sidebar-tab {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .sidebar-tab:hover {
+      background: rgba(42, 45, 50, 0.5);
+      color: #ccc;
+    }
+
+    .sidebar-tab.active {
+      color: #00ff88;
+      border-bottom-color: #00ff88;
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .sidebar-section {
+      margin-bottom: 15px;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #666;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      padding: 8px 5px;
+      margin-bottom: 8px;
+    }
+
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 8px;
+    }
+
+    .asset-item {
+      aspect-ratio: 1;
+      background: rgba(42, 45, 50, 0.6);
+      border: 1px solid #3a3d42;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-size: 24px;
+    }
+
+    .asset-item:hover {
+      border-color: #00ff88;
+      background: rgba(42, 45, 50, 1);
+    }
+
+    /* CENTER VIEWPORT */
+    .viewport-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #0a0b0d;
+    }
+
+    .viewport-toolbar {
+      background: rgba(15, 16, 19, 0.8);
+      border-bottom: 1px solid #2a2d32;
+      padding: 8px 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      height: 38px;
+    }
+
+    .viewport-tool-btn {
+      width: 32px;
+      height: 32px;
+      background: rgba(42, 45, 50, 0.6);
+      border: 1px solid #3a3d42;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .viewport-tool-btn:hover {
+      background: rgba(42, 45, 50, 1);
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+
+    .viewport-tool-btn.active {
+      background: #00ff88;
+      color: #000;
+      border-color: #00ff88;
+    }
+
+    .viewport-separator {
+      width: 1px;
+      height: 20px;
+      background: #2a2d32;
+      margin: 0 5px;
+    }
+
+    .viewport-info {
+      margin-left: auto;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .viewport-canvas {
+      flex: 1;
+      background: linear-gradient(135deg, #0a0b0d 0%, #1a1d22 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .viewport-placeholder {
+      text-align: center;
+      color: #444;
+    }
+
+    .viewport-placeholder-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    .viewport-placeholder-text {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+
+    .viewport-placeholder-hint {
+      font-size: 13px;
+      color: #444;
+    }
+
+    .gizmo-controls {
+      background: rgba(15, 16, 19, 0.8);
+      border: 1px solid #2a2d32;
+      border-radius: 4px;
+      padding: 8px;
+      display: flex;
+      gap: 5px;
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+    }
+
+    .gizmo-btn {
+      width: 36px;
+      height: 36px;
+      background: rgba(42, 45, 50, 0.6);
+      border: 1px solid #3a3d42;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    .gizmo-btn:hover {
+      background: rgba(42, 45, 50, 1);
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+
+    .gizmo-btn.active {
+      background: #00ff88;
+      color: #000;
+      border-color: #00ff88;
+    }
+
+    /* SIDEBAR RIGHT */
+    .sidebar-right {
+      width: 320px;
+      background: rgba(20, 22, 26, 0.8);
+      border-left: 1px solid #2a2d32;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .inspector-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #2a2d32;
+      height: 40px;
+    }
+
+    .inspector-tab {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .inspector-tab:hover {
+      background: rgba(42, 45, 50, 0.5);
+      color: #ccc;
+    }
+
+    .inspector-tab.active {
+      color: #00ff88;
+      border-bottom-color: #00ff88;
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    .inspector-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+    }
+
+    .inspector-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      color: #555;
+      font-size: 13px;
+    }
+
+    .property-group {
+      margin-bottom: 15px;
+    }
+
+    .property-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: #666;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      padding: 8px 5px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .property-label:hover {
+      color: #999;
+    }
+
+    .property-group-arrow {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-right: 1px solid #666;
+      border-bottom: 1px solid #666;
+      transform: rotate(-45deg);
+      transition: transform 0.2s;
+    }
+
+    .property-group.collapsed .property-group-arrow {
+      transform: rotate(45deg);
+    }
+
+    .property-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .property-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .property-name {
+      min-width: 80px;
+      color: #999;
+    }
+
+    .property-input {
+      flex: 1;
+      background: rgba(42, 45, 50, 0.4);
+      border: 1px solid #3a3d42;
+      color: #ccc;
+      padding: 5px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .property-input:focus {
+      outline: none;
+      border-color: #00ff88;
+      background: rgba(42, 45, 50, 0.6);
+    }
+
+    /* BOTTOM PANEL */
+    .bottom-panel {
+      background: rgba(20, 22, 26, 0.8);
+      border-top: 1px solid #2a2d32;
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .bottom-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid #2a2d32;
+      height: 36px;
+    }
+
+    .bottom-tab {
+      background: transparent;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 0 16px;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+
+    .bottom-tab:hover {
+      background: rgba(42, 45, 50, 0.5);
+      color: #ccc;
+    }
+
+    .bottom-tab.active {
+      color: #00ff88;
+      border-bottom-color: #00ff88;
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    .bottom-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: #999;
+      line-height: 1.4;
+    }
+
+    .console-message {
+      margin-bottom: 8px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(42, 45, 50, 0.3);
+    }
+
+    .console-message.info {
+      color: #00ff88;
+    }
+
+    .console-message.warning {
+      color: #ffcc00;
+    }
+
+    .console-message.error {
+      color: #ff4466;
+    }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 100, 100, 0.3);
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 100, 100, 0.5);
+    }
+
+    /* MODAL */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: rgba(20, 22, 26, 0.95);
+      border: 1px solid #3a3d42;
+      border-radius: 8px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #fff;
+    }
+
+    .modal-description {
+      font-size: 13px;
+      color: #999;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #ccc;
+    }
+
+    .form-input {
+      background: rgba(42, 45, 50, 0.4);
+      border: 1px solid #3a3d42;
+      color: #ccc;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      transition: all 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #00ff88;
+      background: rgba(42, 45, 50, 0.6);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn-primary {
+      background: #00ff88;
+      color: #000;
+    }
+
+    .modal-btn-primary:hover {
+      background: #00cc88;
+      transform: translateY(-1px);
+    }
+
+    .modal-btn-secondary {
+      background: rgba(42, 45, 50, 0.6);
+      color: #ccc;
+      border: 1px solid #3a3d42;
+    }
+
+    .modal-btn-secondary:hover {
+      background: rgba(42, 45, 50, 1);
+      border-color: #00ff88;
+      color: #00ff88;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1200px) {
+      .sidebar-left {
+        width: 250px;
+      }
+
+      .sidebar-right {
+        width: 280px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        flex-direction: column;
+      }
+
+      .sidebar-left,
+      .sidebar-right {
+        width: 100%;
+        height: 150px;
+        border: none;
+      }
+
+      .sidebar-left {
+        border-bottom: 1px solid #2a2d32;
+      }
+
+      .sidebar-right {
+        border-top: 1px solid #2a2d32;
+      }
+
+      .bottom-panel {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="editor-container">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-logo">TIGEN</div>
+        <div class="topbar-title">Untitled Scene</div>
+      </div>
+
+      <div class="topbar-center">
+        <button class="topbar-btn">File</button>
+        <button class="topbar-btn">Edit</button>
+        <button class="topbar-btn">View</button>
+        <button class="topbar-btn">GameObject</button>
+        <button class="topbar-btn">Tools</button>
+        <button class="topbar-btn">Help</button>
+      </div>
+
+      <div class="topbar-right">
+        <button class="topbar-btn" onclick="playScene()">▶ Play</button>
+        <button class="topbar-btn" onclick="saveScene()">💾 Save</button>
+        <button class="topbar-btn" onclick="goHome()">Home</button>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <!-- LEFT SIDEBAR - ASSETS/HIERARCHY -->
+      <div class="sidebar-left">
+        <div class="sidebar-tabs">
+          <button class="sidebar-tab active" onclick="switchTab(this, 'assets')">Assets</button>
+          <button class="sidebar-tab" onclick="switchTab(this, 'hierarchy')">Hierarchy</button>
+        </div>
+
+        <div class="sidebar-content">
+          <!-- Assets Tab -->
+          <div id="assets" class="sidebar-section">
+            <div class="sidebar-section-title">Models</div>
+            <div class="asset-grid">
+              <div class="asset-item" title="Cube">📦</div>
+              <div class="asset-item" title="Sphere">⚪</div>
+              <div class="asset-item" title="Cylinder">📐</div>
+              <div class="asset-item" title="Plane">◻️</div>
+              <div class="asset-item" title="Pyramid">△</div>
+              <div class="asset-item" title="Torus">◯</div>
+            </div>
+
+            <div class="sidebar-section-title" style="margin-top: 15px;">Lights</div>
+            <div class="asset-grid">
+              <div class="asset-item" title="Directional">🔦</div>
+              <div class="asset-item" title="Point">💡</div>
+              <div class="asset-item" title="Spot">🎯</div>
+            </div>
+
+            <div class="sidebar-section-title" style="margin-top: 15px;">Effects</div>
+            <div class="asset-grid">
+              <div class="asset-item" title="Particle">✨</div>
+              <div class="asset-item" title="Trail">〰️</div>
+              <div class="asset-item" title="Sound">🔊</div>
+            </div>
+          </div>
+
+          <!-- Hierarchy Tab -->
+          <div id="hierarchy" class="sidebar-section" style="display: none;">
+            <div style="color: #999; font-size: 12px; padding: 10px; text-align: center;">
+              Scene Hierarchy
+            </div>
+            <div style="color: #666; font-size: 11px; padding: 10px;">
+              • Main Camera<br>
+              • Directional Light<br>
+              • Ground Plane<br>
+              • Sample Objects
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER VIEWPORT -->
+      <div class="viewport-container">
+        <div class="viewport-toolbar">
+          <button class="viewport-tool-btn active" title="Move (W)">⬌</button>
+          <button class="viewport-tool-btn" title="Rotate (E)">↻</button>
+          <button class="viewport-tool-btn" title="Scale (R)">⊞</button>
+          <button class="viewport-tool-btn" title="View (T)">👁</button>
+          <div class="viewport-separator"></div>
+          <button class="viewport-tool-btn" title="Grid">⊞</button>
+          <button class="viewport-tool-btn" title="Gizmos">🎯</button>
+          <button class="viewport-tool-btn" title="Lighting">☀️</button>
+          <div class="viewport-separator"></div>
+          <div class="viewport-info">FPS: 60 | Objects: 3 | Faces: 1,024</div>
+        </div>
+
+        <div class="viewport-canvas">
+          <div class="viewport-placeholder">
+            <div class="viewport-placeholder-icon">🎮</div>
+            <div class="viewport-placeholder-text">3D Viewport</div>
+            <div class="viewport-placeholder-hint">Add objects from the Assets panel to begin</div>
+          </div>
+
+          <div class="gizmo-controls">
+            <button class="gizmo-btn active" title="Move">⬌</button>
+            <button class="gizmo-btn" title="Rotate">↻</button>
+            <button class="gizmo-btn" title="Scale">⊞</button>
+            <button class="gizmo-btn" title="Center">◉</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDEBAR - INSPECTOR -->
+      <div class="sidebar-right">
+        <div class="inspector-tabs">
+          <button class="inspector-tab active" onclick="switchInspectorTab(this, 'properties')">
+            Properties
+          </button>
+          <button class="inspector-tab" onclick="switchInspectorTab(this, 'materials')">
+            Materials
+          </button>
+        </div>
+
+        <div class="inspector-content">
+          <div id="properties-empty" class="inspector-empty">
+            Select an object to view properties
+          </div>
+
+          <div id="properties-content" style="display: none;">
+            <!-- Transform Group -->
+            <div class="property-group">
+              <div class="property-label" onclick="togglePropertyGroup(this)">
+                <span>
+                  <span class="property-group-arrow"></span>
+                  Transform
+                </span>
+              </div>
+              <div class="property-list">
+                <div class="property-item">
+                  <span class="property-name">Position X</span>
+                  <input type="number" class="property-input" value="0" />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Position Y</span>
+                  <input type="number" class="property-input" value="0" />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Position Z</span>
+                  <input type="number" class="property-input" value="0" />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Rotation X</span>
+                  <input type="number" class="property-input" value="0" />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Rotation Y</span>
+                  <input type="number" class="property-input" value="0" />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Rotation Z</span>
+                  <input type="number" class="property-input" value="0" />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Scale X</span>
+                  <input type="number" class="property-input" value="1" />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Scale Y</span>
+                  <input type="number" class="property-input" value="1" />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Scale Z</span>
+                  <input type="number" class="property-input" value="1" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Physics Group -->
+            <div class="property-group">
+              <div class="property-label" onclick="togglePropertyGroup(this)">
+                <span>
+                  <span class="property-group-arrow"></span>
+                  Physics
+                </span>
+              </div>
+              <div class="property-list">
+                <div class="property-item">
+                  <span class="property-name">Mass</span>
+                  <input type="number" class="property-input" value="1" />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Gravity</span>
+                  <input type="checkbox" style="flex: 0; cursor: pointer;" checked />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Friction</span>
+                  <input type="number" class="property-input" value="0.5" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Rendering Group -->
+            <div class="property-group">
+              <div class="property-label" onclick="togglePropertyGroup(this)">
+                <span>
+                  <span class="property-group-arrow"></span>
+                  Rendering
+                </span>
+              </div>
+              <div class="property-list">
+                <div class="property-item">
+                  <span class="property-name">Visible</span>
+                  <input type="checkbox" style="flex: 0; cursor: pointer;" checked />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Cast Shadow</span>
+                  <input type="checkbox" style="flex: 0; cursor: pointer;" checked />
+                </div>
+                <div class="property-item">
+                  <span class="property-name">Receive Shadow</span>
+                  <input type="checkbox" style="flex: 0; cursor: pointer;" checked />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="materials-empty" class="inspector-empty">
+            Select an object to edit materials
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM PANEL -->
+    <div class="bottom-panel">
+      <div class="bottom-tabs">
+        <button class="bottom-tab active" onclick="switchBottomTab(this, 'console')">Console</button>
+        <button class="bottom-tab" onclick="switchBottomTab(this, 'output')">Output</button>
+        <button class="bottom-tab" onclick="switchBottomTab(this, 'debug')">Debug</button>
+      </div>
+      <div class="bottom-content">
+        <div id="console">
+          <div class="console-message info">✓ TIGEN Engine v2 Initialized</div>
+          <div class="console-message info">✓ Editor Ready</div>
+          <div class="console-message info">✓ Renderer Active</div>
+          <div class="console-message">Ready for input...</div>
+        </div>
+        <div id="output" style="display: none;">
+          <div class="console-message">Output messages will appear here</div>
+        </div>
+        <div id="debug" style="display: none;">
+          <div class="console-message">Debug information will appear here</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <div class="modal" id="newProjectModal">
+    <div class="modal-content">
+      <div class="modal-title">Create New Project</div>
+      <div class="modal-description">Start a new game project with default settings</div>
+      <div class="modal-form">
+        <div class="form-group">
+          <label class="form-label">Project Name</label>
+          <input type="text" class="form-input" placeholder="My Game Project" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Template</label>
+          <select class="form-input">
+            <option>Empty Scene</option>
+            <option>3D Scene</option>
+            <option>Physics Demo</option>
+            <option>Particles Demo</option>
+          </select>
+        </div>
+        <div class="modal-buttons">
+          <button class="modal-btn modal-btn-primary" onclick="createProject()">Create</button>
+          <button class="modal-btn modal-btn-secondary" onclick="closeModal('newProjectModal')">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(btn, tabName) {
+      document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.sidebar-section').forEach(s => s.style.display = 'none');
+      btn.classList.add('active');
+      document.getElementById(tabName).style.display = 'block';
+    }
+
+    function switchInspectorTab(btn, tabName) {
+      document.querySelectorAll('.inspector-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('[id$="-empty"], [id$="-content"]').forEach(e => e.style.display = 'none');
+      btn.classList.add('active');
+      const contentId = tabName === 'properties' ? 'properties-content' : 'materials-empty';
+      const emptyId = tabName === 'properties' ? 'properties-empty' : 'materials-empty';
+      if (tabName === 'properties') {
+        document.getElementById('properties-content').style.display = 'block';
+        document.getElementById('materials-empty').style.display = 'none';
+      } else {
+        document.getElementById('properties-empty').style.display = 'none';
+        document.getElementById('materials-empty').style.display = 'flex';
+      }
+    }
+
+    function switchBottomTab(btn, tabName) {
+      document.querySelectorAll('.bottom-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.bottom-content > div').forEach(d => d.style.display = 'none');
+      btn.classList.add('active');
+      document.getElementById(tabName).style.display = 'block';
+    }
+
+    function togglePropertyGroup(label) {
+      label.parentElement.classList.toggle('collapsed');
+    }
+
+    function playScene() {
+      alert('Play Mode - Scene simulation would start here');
+    }
+
+    function saveScene() {
+      alert('Scene Saved Successfully');
+    }
+
+    function goHome() {
+      window.location.href = 'index-new.html';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function createProject() {
+      alert('Project created successfully!');
+      closeModal('newProjectModal');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIGEN v2 - Advanced 3D Game Engine</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0a0b0d 0%, #1a1d22 100%);
+      color: #ececed;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Load the intro page by default -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check if we should load editor
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('mode') === 'editor') {
+        window.location.href = 'editor-new.html';
+      } else {
+        // Load intro page
+        window.location.href = 'index-new.html';
+      }
+    });
+  </script>
+</body>
+</html>
