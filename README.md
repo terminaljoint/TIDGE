@@ -33,6 +33,9 @@ TIDGE stands for **Terminal joint Intelligence Development Game Engine** and ref
 ✅ **Save/Load** - Scenes saved to browser local storage  
 ✅ **Console** - Real-time debug logging  
 ✅ **60 FPS** - Smooth, responsive performance  
+✅ **WebGL Renderer** - Depth testing, back-face culling, textured materials  
+✅ **Input & Physics** - Keyboard/mouse input, pointer lock, gravity, collisions  
+✅ **Core Systems** - Scene graph, components, cameras, serialization, scripts  
 
 ## 📁 Files
 
@@ -91,9 +94,12 @@ TIDGE stands for **Terminal joint Intelligence Development Game Engine** and ref
 ### Engine Core (engine-aaa.js)
 - **Math**: Vec3 (3D vectors), Matrix4 (transformations)
 - **Animation**: Keyframe, AnimationCurve, AnimationClip, AnimationController
-- **Graphics**: Geometry (procedural meshes), Material, Renderer
-- **Scene**: Entity, Scene, Transform
-- **Loop**: GameLoop with delta time (60 FPS)
+- **Graphics**: Geometry (procedural meshes), Material, WebGLRenderer, Renderer
+- **Scene**: Entity, Scene, Transform, Component System
+- **Input/Physics**: InputSystem, RigidBody, AABB/Sphere, Raycasting
+- **Loop**: Fixed timestep + variable render GameLoop with pause/resume
+- **Assets**: Texture + model loaders (OBJ/GLTF) with caching
+- **Scripts/Audio**: Script lifecycle hooks + Web Audio engine
 
 ### Editor (editor-aaa.html)
 - **Layout**: 5-panel professional interface
