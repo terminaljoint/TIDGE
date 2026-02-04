@@ -185,6 +185,7 @@
   <div class="layout">
     <div class="header">
       <div class="title">🎮 TIDGE 3D Editor</div>
+      <div class="title">🎮 TIDGE - Terminal joint Intelligence Development Game Engine Editor</div>
       <div class="stats">
         <div class="stat">Entities: <span id="entityCount">0</span></div>
         <div class="stat">FPS: <span id="fpsCount">0</span></div>
@@ -433,6 +434,26 @@
       overlayCtx.moveTo(start.x, start.y);
       overlayCtx.lineTo(end.x, end.y);
       overlayCtx.stroke();
+      log('Editor initialized', 'success');
+    }
+
+    function update(dt, isFixed) {
+      if (isFixed) {
+        scene.update(dt);
+      }
+      if (!isFixed && isTimelinePlay && selectedEntity && selectedEntity.animationController.currentClip) {
+        timelineTime += dt;
+        document.getElementById('timelineSlider').value = timelineTime;
+        document.getElementById('timelineTime').textContent = timelineTime.toFixed(1) + 's';
+        if (timelineTime >= selectedEntity.animationController.currentClip.duration) {
+          timelineTime = 0;
+        }
+      }
+      if (!isFixed) {
+        renderer.render(scene);
+        document.getElementById('entityCount').textContent = scene.entities.length;
+        document.getElementById('fpsCount').textContent = gameLoop.fps;
+      }
     }
 
     // ===== CREATION =====
@@ -483,6 +504,37 @@
       } else {
         cameraController = new FreeCamera(camera, 6);
         log('Camera set to Free mode', 'info');
+    // ===== SELECTION =====
+    function selectEntity(entity) {
+      if (selectedEntity) selectedEntity.selected = false;
+      selectedEntity = entity;
+      if (selectedEntity) {
+        selectedEntity.selected = true;
+        log(`Selected: ${selectedEntity.name}`, 'info');
+      }
+      updateInspector();
+    }
+
+    function selectEntityById(id) {
+      const entity = scene.entities.find(e => e.id === id);
+      if (entity) selectEntity(entity);
+    }
+
+    const canvas = document.getElementById('viewport');
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      for (const entity of scene.entities) {
+        const ex = renderer.width / 2 + entity.transform.position.x * renderer.zoom;
+        const ey = renderer.height / 2 - entity.transform.position.z * renderer.zoom;
+        const s = Math.max(entity.transform.scale.x, entity.transform.scale.z) * renderer.zoom;
+
+        if (mx > ex - s / 2 && mx < ex + s / 2 && my > ey - s / 2 && my < ey + s / 2) {
+          selectEntity(entity);
+          return;
+        }
       }
     }
 
@@ -531,6 +583,8 @@
       }
       updateInspector();
     }
+      selectEntity(null);
+    });
 
     function selectEntityById(id) {
       const entity = scene.entities.find(e => e.id === id);
@@ -637,6 +691,7 @@
         html += `<div class="asset-item" onclick="selectEntityById(${entity.id})">${entity.name}</div>`;
       }
       document.getElementById('entityList').innerHTML = html || '<div style="color: #666; font-size: 11px;">No entities yet</div>';
+      document.getElementById('entityList').innerHTML = html || '<div style=\"color: #666; font-size: 11px;\">No entities yet</div>';
     }
 
     // ===== ANIMATION =====
@@ -661,6 +716,14 @@
       } else {
         gameLoop.pause();
       }
+    }
+
+    function toggleGrid() {
+      log('Grid toggled');
+    }
+
+    function resetView() {
+      log('View reset');
     }
 
     // ===== DELETION =====
